@@ -1,0 +1,347 @@
+{% extends 'general_app/base.html' %}
+{% block title %}Configuration{% endblock %}
+{% block head %}
+    <style>
+        label {
+            font-size: 20px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    {% for message in messages %}
+        {% if message.message == 'การตั้งค่าการลบถูกเปลี่ยนสถานะเรียบร้อย' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif message.message == 'การตั้งค่าการส่งอีเมลถูกเปลี่ยนสถานะเรียบร้อย' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif 'เพิ่มจังหวัด' in message.message %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif 'เพิ่มกระทรวง' in message.message %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif 'ลบกระทรวง' in message.message %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif 'ลบจังหวัด' in message.message %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% elif 'วันที่ลบ' in message.message %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '{{ message.message }}'
+                })
+            </script>
+        {% endif %}
+    {% endfor %}
+    {% if request.user.is_superuser %}
+        <div class="jumbotron" style="min-height: 80vh;display: flex;align-items: center;">
+            <div class="container shadow mb-5 rounded rounded-4 overflow-hidden" style="background-color: white">
+                <form action="{% url 'configuration' %}" method="post" class="mt-3" id="form_delete_province">
+                    {% csrf_token %}
+                    <label for="sender_mail">จังหวัด</label>
+                    <div class="d-flex bd-highlight">
+                        <div class="w-100 bd-highlight">
+                            <select class="form-select mb-3 form-select-lg" aria-label="Default select example"
+                                    name="select_province" id="select_province">
+                                {% for province in province %}
+                                    <option value={{ province }}>{{ province }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mx-2 flex-shrink-1 bd-highlight">
+                            <button type="button" class="btn btn-danger btn-lg" onclick="delete_btn('select_province')"
+                                    name="btn_delete_province" {% if province %}{% else %}disabled{% endif %}>
+                                ลบ
+                            </button>
+                        </div>
+                        <div class="flex-shrink-1 bd-highlight">
+                            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal"
+                                    data-bs-target="#add_province">
+                                เพิ่ม
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+
+                <form action="{% url 'configuration' %}" method="post" class="mb-3" id="form_delete_ministry">
+                    {% csrf_token %}
+                    <label for="sender_mail">กระทรวง</label>
+                    <div class=" d-flex bd-highlight">
+                        <div class="w-100 bd-highlight">
+                            <select class="form-select form-select-lg" aria-label="Default select example"
+                                    name="select_ministry" id="select_ministry">
+                                {% for ministry in ministry %}
+                                    <option value={{ ministry }}>{{ ministry }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mx-2 flex-shrink-1 bd-highlight">
+                            <button type="button" class="btn btn-danger btn-lg" name="btn_delete_ministry"
+                                    id="btn_delete_ministry" onclick="delete_btn('select_ministry')"
+                                    {% if ministry %}{% else %}disabled{% endif %}>
+                                ลบ
+                            </button>
+                        </div>
+                        <div class="flex-shrink-1 bd-highlight">
+                            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal"
+                                    data-bs-target="#add_ministry">
+                                เพิ่ม
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+
+                <form action="{% url 'configuration' %}" method="post">
+                    {% csrf_token %}
+                    <label for="delete_date">เลือกเวลาลบไฟล์</label>
+                    <div class=" d-flex bd-highlight">
+                        <div class="w-100 bd-highlight">
+                            <select class="form-select mb-3 form-select-lg" aria-label="Default select example"
+                                    name="delete_date"
+                                    id="delete_date"
+                                    {% if not form_configuration.delete_date_status %}style="pointer-events: none;background-color: darkgray" {% endif %}>
+                                {% for count in '12345'|make_list %}
+                                    <option value="{{ forloop.counter }}"
+                                            {% if forloop.counter == form_configuration.delete_date %}selected {% else %}{% endif %}>{{ forloop.counter }}ปี
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {#                 <input type="hidden" name="delete_date" value="{{ forloop.counter }}" />#}
+                        </div>
+                        <div class="ms-2 flex-shrink-1 bd-highlight">
+                            {% if form_configuration.delete_date_status %}
+                                <button type="submit" class="btn btn-success btn-lg" name="is_delete">ปิด</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-outline-secondary btn-lg" name="is_delete">เปิด
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <label for="sent_mail_date">เลือกเวลาส่งอีเมล</label>
+                    <div class=" d-flex bd-highlight">
+                        <div class="w-100 bd-highlight">
+                            <select class="form-select mb-3 form-select-lg" aria-label="Default select example"
+                                    name="send_mail_date"
+                                    id="send_mail_date" {% if not form_configuration.sender_mail_status %}
+                                    style="pointer-events: none;background-color: darkgray" {% endif %}>
+                                {% for count in '123456'|make_list %}
+                                    <option value="{{ forloop.counter }}"
+                                            {% if forloop.counter == form_configuration.send_mail_date %}selected {% else %}{% endif %}>{{ forloop.counter }}เดือน
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="ms-2 flex-shrink-1 bd-highlight">
+                            {% if form_configuration.sender_mail_status %}
+                                <button type="submit" class="btn btn-success btn-lg" name="is_send">ปิด</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-outline-secondary btn-lg" name="is_send">เปิด
+                                </button>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <button type="submit" class="mb-3 mt-1 btn btn-success btn-lg">บันทึก</button>
+                </form>
+            </div>
+        </div>
+
+        {#    add_province#}
+        <form action="{% url 'configuration' %}" method="POST">
+            {% csrf_token %}
+            <div class="modal fade" id="add_province" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">เพิ่มจังหวัด</h5>
+                            <button type="button" class="btn-close btn-lg" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-control form-control-lg" type="text" name="add_province"
+                                   autocomplete="off">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">ยืนยัน</button>
+                            <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">ปิด</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
+
+        {#    add_ministry#}
+        <form action="{% url 'configuration' %}" method="post">
+            {% csrf_token %}
+            <div class="modal fade" id="add_ministry" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">เพิ่มกระทรวง</h5>
+                            <button type="button" class="btn-close btn-lg" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-control form-control-lg" type="text" name="add_ministry"
+                                   autocomplete="off">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">บันทึก</button>
+                            <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">ปิด</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <script>
+            window.location = '{% url 'home' %}'
+        </script>
+    {% endif %}
+
+    <script>
+        function delete_btn(item) {
+            let name = document.getElementById(item).value
+            Swal.fire({
+                title: `ต้องการลบ <u>${name}</u> หรือไม่`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (item == 'select_province') {
+                        let form = document.getElementById("form_delete_province");
+                        form.submit()
+                    } else {
+                        let form = document.getElementById("form_delete_ministry");
+                        form.submit()
+                    }
+                }
+            })
+
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,361 @@
+{% extends 'general_app/base.html' %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
+    <style>
+        .dataTables_filter {
+            display: none;
+        }
+
+        .dataTables_length {
+            margin-bottom: 10px;
+        }
+
+        table.dataTable.stripe > tbody > tr.even > *, table.dataTable.display > tbody > tr.even > * {
+            background-color: #E2E3E5;
+        }
+        #myInputTextField{
+            width: 35%;
+        }
+        @media screen and (max-width: 500px) {
+            #myInputTextField {
+                font-size: 18px;
+                width: 50%;
+            }
+
+        }
+    </style>
+{% endblock %}
+{% block title %}Certificate{% endblock %}
+{% block content %}
+    {% load static %}
+    {% load bootstrap_icons %}
+    <style>
+        .select2-container .select2-selection--single {
+            width: 200px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            font-size: 20px;
+        }
+    </style>
+    {% for message in messages %}
+        {% if message.message == 'login success' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: '<strong>{{ user }}</strong> เข้าสู่ระบบเรียบร้อยแล้ว'
+                })
+            </script>
+
+
+        {% elif message.message == 'email success' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'เพิ่ม <strong>{{ email_authen }}</strong> เรียบร้อย'
+                })
+            </script>
+
+
+        {% elif message.message == 'emails are not match' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'error',
+                    title: 'กรุณาตรวจสอบอีเมลอีกครั้งเพื่อความถูกต้อง'
+                })
+            </script>
+        {% elif message.message == 'deleted complete' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'ลบเอกสารเรียบร้อย'
+                })
+            </script>
+        {% endif %}
+
+
+    {% endfor %}
+
+
+    {% if request.user.is_superuser %}
+        <form action="{% url 'home' %}" method="get">
+            <div class="d-flex justify-content-center flex-wrap" style="margin-top: 30px">
+                <input type="text" class="form-control form-control-lg"id="myInputTextField"
+                       placeholder="ค้นหาโรงพยาบาล" autocomplete="off">
+
+
+            </div>
+        </form>
+    {% endif %}
+
+
+    <div class="d-flex justify-content-center flex-wrap">
+        <div class="p-2 flex-grow-2 bd-highlight table-responsive" style="width: 85%;">
+            <table class="table table-lg table-hover shadow mb-5 rounded rounded-4 overflow-hidden border border-primary"
+                   id="table_id">
+                <thead>
+                <tr class="table" style="color: white;background-color: #0A58CA">
+                    <th scope="col">ลำดับที่</th>
+                    {% if request.user.is_superuser %}
+                        <th scope="col">โรงพยาบาล</th>
+                    {% endif %}
+                    <th scope="col">ไฟล์</th>
+                    <th scope="col" style="width: 25%">วันที่</th>
+                    {% if request.user.is_superuser %}
+                        <th scope="col"></th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody style="font-size: 18px">
+                <div class="container" >
+                    {% for cert,cert_date in certs %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            {% if request.user.is_superuser %}
+                                <td>{{ cert.hospital }}</td>
+                            {% endif %}
+                            <td><a href="{{ cert.cert.url }}"
+                                   onclick="window.location.replace('{% url 'home' cert.id cert.cert.url %}');"
+                                   {% comment %}target="_blank"{% endcomment %}>{{ cert.cert.name|slice:"5:" }}</a></td>
+
+                            {#                                    <td>{{ cert.create_date|date:"D d M Y" }}</td>#}
+                            <td>{{ cert_date }}</td>
+                            {% if request.user.is_superuser %}
+                                <td>
+                                    <button type="button" name="delete_record"
+                                            onclick="delete_rec('{{ cert.id }}','{{ cert.cert.name|slice:"5:" }}')"
+                                            {#                                            onclick="location.href='{% url 'delete_record' cert.id %}';"#}
+                                            class="btn btn-danger">{% bs_icon 'trash' size='23' %}</button>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </div>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+    {#email_authen#}
+    {#    {% if user.email == '' and email_authen is None or email_authen != email_valid %}#}
+    <form action="{% url 'home' %}" METHOD="post" name="test">
+        {% csrf_token %}
+        <div class="modal fade" id="enter_information" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             data-bs-backdrop="static" data-bs-keyboard="false"
+             data-keyboard="false" data-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">กรอกข้อมูล</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                                onclick="javascript:window.location.reload()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <label>ตำแหน่ง <span style="color: red">*</span></label>
+                            <input type="text" class="form-control mb-3"
+                                   placeholder="ตำแหน่ง" name="position" required
+                                   {% if email_authen %}value="{{ position }} {% endif %}">
+                            <div class="row">
+                                <div class="col">
+                                    <label>ชื่อ<span style="color: red">*</span></label>
+                                    <input type="text" class="form-control mb-3"
+                                           placeholder="ชื่อ" name="first_name" required
+                                           {% if email_authen %}value="{{ first_name }} {% endif %}">
+                                </div>
+                                <div class="col">
+                                    <label>นามสกุล <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control mb-3"
+                                           placeholder="สกุล" name="last_name" required
+                                           {% if email_authen %}value="{{ last_name }} {% endif %}">
+                                </div>
+                            </div>
+                            <label>เบอร์โทร <span style="color: red">*</span></label>
+                            <input type="text" class="form-control mb-3" minlength="6" maxlength="12"
+                                   oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*?)\..*/g, '$1');"
+                                   placeholder="เบอร์โทรที่สามารถติดต่อได้" name="number" required
+                                   {% if email_authen %}value="{{ number }} {% endif %}">
+                            <label>อีเมล <span style="color: red">*</span></label>
+                            <input type="email" class="form-control mb-1" id="exampleInputEmail1"
+                                   aria-describedby="emailHelp"
+                                   placeholder="กรอกอีเมล" name="email" required
+                                   {% if email_authen %}value="{{ email_authen }} {% endif %}">
+                         <small id="emailHelp" class="form-text text-muted ">กรุณาใส่อีเมล์ที่สามารถใช้ได้จริงเพื่อทำการแจ้งเตือนนัดล่วงหน้า.</small>
+                            <label class="mt-3">ยืนยันอีเมล <span style="color: red">*</span></label>
+                            <input type="email" name="email_valid" placeholder="กรอกอีเมลอีกครั้ง"
+                                   class="form-control"
+                                   autocomplete="off">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger me-auto" data-bs-dismiss="modal"
+                                onclick="location.href='{% url 'logout' %}';">ออกจากระบบ
+                        </button>
+                        <button type="submit" class="btn btn-success" name="btn_email">ยืนยัน</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+
+    <script>
+
+
+        $('#submit_file').on('click', function (e) {
+            console.log(e)
+            e.preventDefault();
+            var selected = $("#mySelect2 option:selected").text();
+            var file = document.getElementById("upload_input").files[0].name;
+            var form = $(this).parents('form');
+            swal.fire({
+                title: "ยืนยันการอัปโหลด",
+                text: `ต้องการที่อัปโหลด ${file} ให้กับ ${selected}`,
+                showCancelButton: true,
+                confirmButtonColor: "#198754",
+                confirmButtonText: "ยืนยัน",
+                cancelButtonColor: '#BB2D3B',
+                cancelButtonText: 'ยกเลิก',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit()
+                }
+            })
+        });
+    </script>
+
+    <script>
+
+        function delete_rec(item, name) {
+
+            Swal.fire({
+                title: `ต้องการลบ\n"<b>${name}</b>"`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonText: 'ยืนยัน',
+
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    item = item.toString()
+                    window.location.replace(item);
+                }
+            })
+        }
+
+        $(document).ready(function () {
+            let oTable = $('#table_id').DataTable({
+
+
+                "language": {
+                    "decimal": "",
+                    "emptyTable": "ไม่มีรายการข้อมูล",
+                    "info": "แสดงรายการที่ _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+                    "infoEmpty": "ไม่มีรายการข้อมูล",
+                    "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "แสดง  _MENU_ รายการ",
+                    "loadingRecords": "กำลังโหลดข้อมูล...",
+                    "processing": "กำลังประมวลผล...",
+                    "search": "ค้นหา:",
+                    "zeroRecords": "ไม่พบรายการที่ค้นหา",
+                    "paginate": {
+                        "first": "หน้าแรก",
+                        "last": "หน้าสุดท้าย",
+                        "next": "ถัดไป",
+                        "previous": "ก่อนหน้า"
+                    },
+                    "aria": {
+                        "sortAscending": ": เรียงข้อมูลจากน้อยไปมาก",
+                        "sortDescending": ": เรียงข้อมูลจากมากไปน้อย"
+                    }
+                },
+
+
+                "ordering": false
+            });
+            $('#myInputTextField').keyup(function () {
+                oTable.search($(this).val()).draw(); // this  is for customized searchbox with datatable search feature.
+                {#console.log(this.value)#}
+                {#console.log($(this).val())#}
+            })
+            {#user.email == '' and email_authen is None or email_authen != email_valid#}
+            if (('{{ user.email }}' == '' && '{{ email_authen }}' == 'None') || ('{{ email_authen }}' != '{{ email_valid }}')) {
+                console.log('a')
+                console.log('ก')
+                $('#enter_information').modal('show')
+            }
+
+        });
+
+
+    </script>
+    <script type="text/javascript" charset="utf8"
+            src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
+
+{% endblock %}
+
+
+
+
+
+

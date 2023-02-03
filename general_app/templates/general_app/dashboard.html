@@ -1,0 +1,319 @@
+{% extends 'general_app/base.html' %}
+{% block head %}
+    {% load static %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'daterangepicker-master/daterangepicker.css' %}"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <style>
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+            padding-left: 11px;
+            position: relative;
+        }
+
+        .select2-container {
+            height: auto !important;
+            padding: 0;
+        }
+
+        .select2-container .select2-search--inline .select2-search__field {
+            height: 39px;
+        }
+
+
+        .select2-selection--multiple {
+            overflow: hidden !important;
+            height: auto !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 47px;
+        }
+
+        .select2-container .select2-search--inline .select2-search__field {
+            line-height: normal;
+            font-size: 22px;
+            padding-top: 7px;
+        }
+
+        .select2-selection__choice {
+            font-size: 22px;
+        }
+
+        .select2 {
+            min-height: 34px;
+            height: auto;
+        }
+
+        @media only screen and (max-width: 500px) {
+            #div_date_range{
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+{% endblock %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    {% load bootstrap_icons %}
+    {% if request.user.is_superuser %}
+        <form action="{% url 'dashboard' %}" method="get">
+            <div class="d-flex justify-content-center flex-wrap " style="margin-top: 30px">
+                <div class="" style="font-size: 27px;height: 50px">
+                    <select class="js-example-basic-multiple" style="" name="search_users"
+                            multiple="multiple">
+                        {% for user in users %}
+                            <option value="{{ user }}">{{ user }}</option>
+                        {% endfor %}
+                        {% if searched %}
+                            {% for search in searched %}
+                                <option value="{{ search }}" selected>{{ search }}</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+
+
+                <div class="input-group mx-2" style="width: auto" id="div_date_range">
+                    <input type="text" name="daterange" id="date_range" style="border: 1px solid #00000059;border-bottom-left-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;width: 190px"
+                           value="{{ date_range_default_start }} - {{ date_range_default_end }}"/>
+                    <button class="btn btn-outline-secondary" type="button" style="border: 1px solid #00000059;"
+                            onclick="calendar_btn()">{% bs_icon 'calendar' size='23' %}</button>
+                </div>
+
+                <div style="display: flex;align-items: center">
+                    <div class="dropdown me-1">
+                        <button class="btn dropdown-toggle border border-secondary" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" id="dropdown_upload"
+                                style="background-color: white">
+                            การอัปโหลด
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <li>
+                                <button class="dropdown-item" type="button" name="not_select_upload"
+                                        id="not_select_upload_btn">
+                                    ----ไม่เลือก----
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" type="button" id="uploaded_btn">
+                                    อัปโหลดแล้ว
+                                </button>
+                                <input type="hidden" name="uploaded" id="uploaded_input">
+                            </li>
+                            <li>
+                                <button class="dropdown-item" type="button" name="not_upload" id="not_upload_btn">
+                                    ยังไม่อัปโหลด
+                                </button>
+                                <input type="hidden" name="not_upload" id="not_upload_input">
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown ms-1">
+                        <button class="btn dropdown-toggle border border-secondary" type="button" id="dropdown_download"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="background-color: white">
+                            การดาวน์โหลด
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                            <li>
+                                <button class="dropdown-item" type="button" name="not_select_download"
+                                        id="not_select_download_btn">
+                                    ----ไม่เลือก----
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" type="button" name="downloaded" id="downloaded_btn">
+                                    ดาวน์โหลดแล้ว
+                                </button>
+                                <input type="hidden" name="downloaded" id="downloaded_input">
+                            </li>
+                            <li>
+                                <button class="dropdown-item" type="button" name="not_download" id="not_download_btn">
+                                    ยังไม่ดาวน์โหลดแล้ว
+                                </button>
+                                <input type="hidden" name="not_download" id="not_download_input">
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="submit" class="mx-2 btn btn-outline-success btn-lg ">
+                    {% bs_icon 'search' %}
+                </button>
+                {#            <a href="{% url 'pdf' %}">pdf</a>#}
+                <button type="submit" name="pdf" class="btn btn-outline-primary"
+                        value="pdf">{% bs_icon 'filetype-pdf' size='23' %}</button>
+            </div>
+        </form>
+        <form action="{% url 'dashboard' %}" method="post">
+            <input type="hidden" name="pdf">
+
+        </form>
+
+        <div class="d-flex justify-content-center flex-wrap mt-4">
+            <div class="p-2 flex-grow-2 bd-highlight table-responsive" style="width: 85%">
+                <table class="table table-lg table-hover shadow mb-5 rounded rounded-4 overflow-hidden">
+                    <thead>
+                    <tr class="table" style="background-color: #6c7ae0;color: white">
+                        <th scope="col">ลำดับ</th>
+                        <th scope="col">โรงพยาบาล</th>
+                        <th scope="col">วันที่อัปโหลด</th>
+                        <th scope="col">วันที่ดาวน์โหลดล่าสุด</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for count,value in data.items %}
+                        <tr style="{% if forloop.counter|divisibleby:2 == 1 %}background-color: #f8f6ff;{% endif %}">
+                            <td> {{ forloop.counter }}</td>
+                            <td> {{ value.hospital }}</td>
+                            <td>{{ value.upload_date }}</td>
+                            <td> {{ value.download_date }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <script>
+            window.location = '{% url 'home' %}'
+        </script>
+    {% endif %}
+
+    <script>
+        $(function () {
+            $('input[name="daterange"]').daterangepicker({
+                opens: 'left',
+                autoApply: true,
+                locale: {
+                    monthNames: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
+                    daysOfWeek: ['ส', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'อา'],
+                    cancelLabel: 'ล้าง',
+                    applyLabel: 'ยืนยัน',
+                },
+                format: 'MM-DD-YYYY',
+            }, function (start, end, label) {
+                console.log(start)
+                console.log("A new date selection was made: " + start.format('YYYY-MM') + ' to ' + end.format('YYYY-MM'));
+            });
+        });
+
+
+        {#var startDate = new Date(2012, 1, 20);#}
+        {#var endDate = new Date(2012, 1, 25);#}
+        {#$('#date-start')#}
+        {#    .datepicker()#}
+        {#    .on('changeDate', function (ev) {#}
+        {#        if (ev.date.valueOf() > endDate.valueOf()) {#}
+        {#            $('#alert').show().find('strong').text('The start date must be before the end date.');#}
+        {#        } else {#}
+        {#            $('#alert').hide();#}
+        {#            startDate = new Date(ev.date);#}
+        {#            $('#date-start-display').text($('#date-start').data('date'));#}
+        {#        }#}
+        {#        $('#date-start').datepicker('hide');#}
+        {#    });#}
+        {#$('#date-end')#}
+        {#    .datepicker()#}
+        {#    .on('changeDate', function (ev) {#}
+        {#        if (ev.date.valueOf() < startDate.valueOf()) {#}
+        {#            $('#alert').show().find('strong').text('The end date must be after the start date.');#}
+        {#        } else {#}
+        {#            $('#alert').hide();#}
+        {#            endDate = new Date(ev.date);#}
+        {#            $('#date-end-display').text($('#date-end').data('date'));#}
+        {#        }#}
+        {#        $('#date-end').datepicker('hide');#}
+        {#    });#}
+
+        function calendar_btn() {
+            $("#date_range").click();
+        }
+
+
+        $(document).ready(function () {
+
+            $('.js-example-basic-multiple').select2({
+                placeholder: " ค้นหาโรงพยาบาล",
+                width: '100%',
+                dropdownAutoWidth: true,
+            });
+            document.getElementById('dropdown_download').innerText = 'การดาวน์โหลด'
+            document.getElementById('dropdown_upload').innerText = 'การอัปโหลด'
+            document.getElementById('uploaded_input').disabled = true;
+            document.getElementById('not_upload_input').disabled = true;
+            document.getElementById('downloaded_input').disabled = true;
+            document.getElementById('not_download_input').disabled = true;
+            console.log('a')
+            console.log('{{ state_upload }}')
+            console.log('{{ state_download }}')
+            if ('{{ state_upload }}' == 'uploaded') {
+                console.log('uploaded')
+                document.getElementById("uploaded_btn").click();
+            } else if ('{{ state_upload }}' == 'not_upload') {
+                console.log('not_upload')
+                document.getElementById("not_upload_btn").click();
+            }
+            if ('{{ state_download }}' == 'downloaded') {
+                console.log('downloaded')
+                document.getElementById("downloaded_btn").click();
+            } else if ('{{ state_download }}' == 'not_download') {
+                console.log('not_download')
+                document.getElementById("not_download_btn").click();
+            }
+        });
+
+
+        document.querySelector('#uploaded_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_upload').style.backgroundColor = '#198754'
+            document.getElementById('dropdown_upload').innerText = 'อัปโหลดแล้ว'
+            document.getElementById('dropdown_upload').style.color = '#FFFFFF'
+            document.getElementById('not_upload_input').disabled = true;
+            document.getElementById('uploaded_input').disabled = false;
+        });
+        document.querySelector('#not_upload_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_upload').style.backgroundColor = '#DC3545'
+            document.getElementById('dropdown_upload').innerText = 'ยังไม่อัปโหลด'
+            document.getElementById('dropdown_upload').style.color = '#FFFFFF'
+            document.getElementById('uploaded_input').disabled = true;
+            document.getElementById('not_upload_input').disabled = false;
+        });
+        document.querySelector('#not_select_upload_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_upload').style.backgroundColor = '#FFFFFF'
+            document.getElementById('dropdown_upload').innerText = 'การอัปโหลด'
+            document.getElementById('dropdown_upload').style.color = '#000000'
+            document.getElementById('uploaded_input').disabled = true;
+            document.getElementById('not_upload_input').disabled = true;
+        });
+        document.querySelector('#downloaded_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_download').style.backgroundColor = '#198754'
+            document.getElementById('dropdown_download').innerText = 'ดาวน์โหลดแล้ว'
+            document.getElementById('dropdown_download').style.color = '#FFFFFF'
+            document.getElementById('not_download_input').disabled = true;
+            document.getElementById('downloaded_input').disabled = false;
+        });
+        document.querySelector('#not_download_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_download').style.backgroundColor = '#DC3545'
+            document.getElementById('dropdown_download').innerText = 'ยังไม่ดาวน์โหลด'
+            document.getElementById('dropdown_download').style.color = '#FFFFFF'
+            document.getElementById('downloaded_input').disabled = true;
+            document.getElementById('not_download_input').disabled = false;
+        });
+        document.querySelector('#not_select_download_btn').addEventListener('click', function () {
+            document.getElementById('dropdown_download').style.backgroundColor = '#FFFFFF'
+            document.getElementById('dropdown_download').innerText = 'การดาวน์โหลด'
+            document.getElementById('dropdown_download').style.color = '#000000'
+            document.getElementById('downloaded_input').disabled = true;
+            document.getElementById('not_download_input').disabled = true;
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script type="text/javascript" src="{% static 'daterangepicker-master/moment.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'daterangepicker-master/daterangepicker.js' %}"></script>
+
+{% endblock %}

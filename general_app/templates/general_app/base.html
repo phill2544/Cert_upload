@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    {% load static %}
+    {% load bootstrap_icons %}
+    {% block head %}
+
+    {% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %} | Certificate</title>
+    <!-- CSS only -->
+
+ <link rel = "icon" href =
+"{% static 'general_app/2022-03-18-6-22-454373.png' %}"
+        type = "image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    {#    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstraicons@1.8.1/font/bootstrap-icons.css">#}
+
+    <link rel="stylesheet" href="{% static 'main.css' %}"/>
+
+
+{#    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">#}
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@100;400;700&display=swap');
+        * {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        th {
+            font-size: 22px;
+        }
+
+        tr td {
+            font-size: 20px;
+        }
+        body{
+            background-color: #f8f9fd;
+        }
+
+
+    </style>
+
+
+</head>
+<body>
+<header>
+
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-success">
+        <div class="container-fluid ">
+            <a class="navbar-brand" href="{% url 'home' %}" style="margin-left:10px">
+                <img src="{% static 'general_app/2022-03-18-6-22-454373.png' %}" width="55" height="55">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ">
+                    <li class="nav-item active">
+                        <a class="nav-link " href="{% url 'home' %}" id="btn_home" style="font-size: 18px">
+                            {% bs_icon 'folder2-open' size='23' %} <span class="sr-only" style="font-size: 18px">ใบรายงานผล</span>
+                        </a>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="nav-item active">
+                            <a class="nav-link " href="{% url 'upload_certificate' %}" style="font-size: 18px">
+                                {% bs_icon 'upload' size='23' %} <span class="sr-only"
+                                                                       style="font-size: 18px">อัปโหลด</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link " href="{% url 'dashboard' %}" style="font-size: 18px">
+                                {% bs_icon 'folder2-open' size='23' %} <span class="sr-only" style="font-size: 18px">รายงาน</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'manage_user' %}">{% bs_icon 'person-gear' size='23' %}
+                                <span class="sr-only" style="font-size: 18px">จัดการผู้ใช้งาน</span></a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" style="font-size: 18px"
+                               href="{% url 'configuration' %}">{% bs_icon 'gear' size='23' %} <span class="sr-only" style="font-size: 18px">ตั้งค่า</span><span class="sr-only"></span></a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" style="font-size: 18px"
+                               href="{% static 'guide.pdf' %}">{% bs_icon 'file-earmark-text' size='23' %} <span class="sr-only" style="font-size: 18px">คู่มือการใช้งาน</span><span class="sr-only"></span></a>
+                        </li>
+                        {% else %}
+                         <li class="nav-item active">
+                            <a class="nav-link" style="font-size: 18px"
+                               href="{% static 'guide - User.pdf' %}">{% bs_icon 'file-earmark-text' size='23' %} <span class="sr-only" style="font-size: 18px">คู่มือการใช้งาน</span><span class="sr-only"></span></a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href=" {% url 'profile' %}" style="font-size: 18px">
+                            {% bs_icon 'person-circle' size='23' %}
+                            </i> <span class="sr-only" style="font-size: 18px">{{ user.username }}</span><span
+                                class="sr-only"></span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" style="font-size: 18px"
+                           href="{% url 'logout' %}">{% bs_icon 'door-open' size='23' %} <span class="sr-only"
+                                                                                               style="font-size: 18px">ออกจากระบบ</span><span
+                                class="sr-only"></span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+</header>
+<footer></footer>
+
+<!-- JavaScript Bundle with Popper -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous">
+
+</script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{#<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.js"></script>#}
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"
+        integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+<script src="{% static 'main.js' %}"></script>
+<script type="text/javascript">
+
+
+
+
+</script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% block content %}{% endblock %}
+
+{% load sweetify %}
+{% sweetify %}
+
+
+
+
+</body>
+</html>

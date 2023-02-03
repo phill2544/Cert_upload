@@ -1,0 +1,426 @@
+{% extends 'general_app/base.html' %}
+{% block head %}
+    {#        <link rel="stylesheet"#}
+    {#          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.css"/>#}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <style>
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+            padding-left: 11px;
+        }
+
+        .select2-container .select2-search--inline .select2-search__field {
+            height: 39px;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 47px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: normal;
+            font-size: 22px;
+            margin-top: 7px;
+        }
+
+    </style>
+{% endblock %}
+{% block title %}UPLOAD{% endblock %}
+{% block content %}
+    {% load bootstrap_icons %}
+    {% for message in messages %}
+        {% if message.message == 'delete file complete' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'ลบเอกสารเรียบร้อย'
+                })
+            </script>
+
+        {% elif message.message == 'edited file complete' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'ร้องขอการแก้ไขเอกสารเรียบร้อย'
+                })
+            </script>
+
+        {% elif message.message == 'uploaded file complete' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'อัปโหลดเอกสารเรียบร้อย'
+                })
+            </script>
+
+        {% endif %}
+    {% endfor %}
+    {% if request.user.is_superuser %}
+        <form action="{% url 'upload_certificate' %}" method="post" enctype="multipart/form-data"
+              onsubmit="{% comment %}submit_upload.disabled = true; return true;{% endcomment %} submit_upload_func(event)"
+              style="margin-top: 30px" id="upload_file_form">
+            {% csrf_token %}
+            <div class="d-flex flex-row justify-content-center flex-wrap">
+                <div class="p-2 input-group"
+                     style="width: 30%" {% comment %}class="selection2_name p-2"{% endcomment %}>
+                    {{ verify_certificateform.hospital }}
+                </div>
+                <div class="p-2" {% comment %}id="div_upload"{% endcomment %}>
+                    {{ verify_certificateform.cert }}
+                </div>
+                <input type="hidden" name="upload_file">
+                <div class="p-2" {% comment %}id="div_upload_btn"{% endcomment %} {% comment %}class="p-2"{% endcomment %}>
+                    <button type="submit" class="btn btn-outline-success btn-lg" name="submit_upload"
+                            id="submit_upload">อัปโหลด
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="d-flex justify-content-center flex-wrap mt-2">
+            <div class="p-2 flex-grow-2 bd-highlight table-responsive" style="width: 85%;">
+                <table class="table table-lg table-hover caption-top table-striped shadow mb-5 rounded rounded-4 overflow-hidden">
+                    <h3>รอการอนุมัติ</h3>
+                    <thead style="background-color: wheat">
+                    <tr class="table" style="background-color: #198754;color: white">
+                        <th scope="col" {% comment %}style="width: 12%"{% endcomment %}>ลำดับ</th>
+                        <th scope="col" {% comment %}style="width: 24%"{% endcomment %}>โรงพยาบาล</th>
+                        <th scope="col" {% comment %}style="width: 11%"{% endcomment %}>อัปโหลด</th>
+                        <th scope="col" {% comment %}style="width: 26%"{% endcomment %}>ไฟล์</th>
+                        <th scope="col">วันที่</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for cert in verify_certificate_confirm %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ cert.hospital }}</td>
+                            <td>{{ cert.user_create }}</td>
+                            <td><a href="{{ cert.cert.url }}">{{ cert.cert.name|slice:"19:" }}</a></td>
+                            <td>{{ cert.create_date.0 }}</td>
+                            <td>
+                                <div style="width: max-content ;">
+                                    <button type="button" class="btn btn-danger float-end"
+                                            onclick="delete_cert_btn({{ cert.id }})">{% bs_icon 'trash' size='23' %}</button>
+
+                                    <button type="button" class="editing btn btn-warning float-end mx-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editingmodal"
+                                            data-id="{{ cert.id }}">{% bs_icon 'pencil' size='23' %}</button>
+
+
+                                    <button type="button" name="approve_button"
+                                            class="btn btn-success float-end" {% if user.username == cert.user_create %}
+                                            disabled  {% endif %}
+                                            onclick="confirm_cert_btn('{{ cert.cert.url }}','{{ cert.id }}','{{ cert.hospital }}','{{ cert.cert.name|slice:'19:' }}')">{% bs_icon 'check-circle-fill' size='23' %}</button>
+                                </div>
+
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <form action="{% url 'upload_certificate' %}" method="post" enctype="multipart/form-data" id="confirm_file">
+            {% csrf_token %}
+            <input type="hidden" id="cert_id" name="cert_id">
+            <div hidden>
+                <input type="file" id="cert" name="cert">
+            </div>
+            <input type="hidden" id="hospital_id" name="hospital_id">
+            <input type="hidden" name="confirm_cert">
+        </form>
+
+
+
+        <form action="{% url 'upload_certificate' %}" method="post" id="editing_form">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center flex-wrap mt-2">
+                <div class="p-2 flex-grow-2 bd-highlight table-responsive" style="width: 85%;">
+                    <table class="table table-lg table-hover caption-top table-striped shadow mb-5 rounded rounded-4 overflow-hidden">
+                        <h3>รอการแก้ไข</h3>
+                        <thead>
+                        <tr class="table" style="background-color: #FFC107;color: white">
+                            <th scope="col" {% comment %}style="width: 11%"{% endcomment %}>ลำดับ</th>
+                            <th scope="col" {% comment %}style="width: 23%"{% endcomment %}>โรงพยาบาล</th>
+                            <th scope="col" {% comment %}style="width: 27%"{% endcomment %}>เพิ่มการแก้ไข</th>
+                            <th scope="col" {% comment %}style="width: 25%"{% endcomment %}>ไฟล์</th>
+                            <th scope="col">วันที่</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cert in verify_certificate_editing %}
+                            <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td>{{ cert.hospital }}</td>
+                                <td>{{ cert.user_create }}</td>
+                                <td><a href="{{ cert.cert.url }}">{{ cert.cert.name|slice:"19:" }}</a></td>
+                                <td>{{ cert.create_date.0 }}</td>
+                                <td>
+                                    <div style="width: max-content">
+                                        <button type="button" class="btn btn-danger float-end"
+                                                onclick="delete_cert_btn({{ cert.id }})">{% bs_icon 'trash' size='23' %}</button>
+                                        <button type="button" class="btn btn-info float-end mx-2" data-bs-toggle="modal"
+                                                data-bs-target="#info_editing"
+                                                onclick="info_modal('{{ cert.editing_message }}')">{% bs_icon 'info' size='23' %}</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <input type="hidden" id="delete_cert" name="delete_cert">
+        </form>
+
+
+
+
+        <!-- Modal editing -->
+        <form action="{% url 'upload_certificate' %}" method="post">
+            {% csrf_token %}
+            <div class="modal fade" id="editingmodal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">แก้ไข</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="inline">
+                                <div class="row">
+                                    <div class="col-sm-3 col-form-label"><label
+                                            style="font-size: 17px">เพิ่มการแก้ไข:</label></div>
+                                    <div class="col"><input type="text" name="editing_message" class="form-control"
+                                                            required autocomplete="off"></div>
+                                </div>
+                                <input type="hidden" name="cert_id" id="cert_id">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">ยืนยัน</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal fad" id="info_editing" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">แก้ไข</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 id="info_msg"></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        {#                    <button type="button" class="btn btn-primary">Save changes</button>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <script>
+            window.location = '{% url 'home' %}'
+        </script>
+    {% endif %}
+
+    <script>
+
+        $(document).on("click", ".editing", function () {
+            var cert_id = $(this).data('id');
+            $(".modal-body #cert_id").val(cert_id);
+        });
+
+        function info_modal(msg) {
+            document.getElementById("info_msg").innerHTML = msg;
+        }
+
+        function delete_cert_btn(id) {
+            console.log(id)
+            Swal.fire({
+                title: 'คุณต้องการจะลบเอกสารหรือไม่',
+                {% comment %}                text: "You won't be able to revert this!",{% endcomment %}
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#BB2D3B',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonText: 'ยืนยัน',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete_cert').value = id
+                    document.getElementById("editing_form").submit();
+                }
+            })
+        }
+
+        function confirm_cert_btn(url, cert_id, hospital, name) {
+            {#console.log(url)#}
+            Swal.fire({
+                title: 'ยืนยันการอนุมัติ',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#BB2D3B',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonText: 'ยืนยัน'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    loadURLToInputFiled(url, cert_id, hospital, name)
+                }
+            })
+        }
+
+
+        function loadURLToInputFiled(url, cert_id, hospital, name) {
+            document.getElementById('hospital_id').value = hospital
+            document.getElementById('cert_id').value = cert_id
+            {#console.log(url)#}
+            loading_page()
+            getImgURL(url, (imgBlob) => {
+                console.log('2')
+                // Load img blob to input
+                // WIP: UTF8 character error
+                console.log(url)
+                let fileName = name
+                let file = new File([imgBlob], fileName, {
+                    type: "application/pdf",
+                    lastModified: new Date().getTime()
+                }, 'utf-8');
+                let container = new DataTransfer();
+                container.items.add(file);
+                document.querySelector('#cert').files = container.files;
+                console.log('submit')
+                document.getElementById('confirm_file').submit();
+                {#console.log('a')#}
+                {#return location.reload();#}
+            })
+            console.log(document.getElementById('cert').files)
+        }
+
+
+        // xmlHTTP return blob respond
+        function getImgURL(url, callback) {
+            console.log('test', url)
+            var xhr = new XMLHttpRequest();
+            console.log(xhr)
+            console.log('1')
+            xhr.onload = function () {
+                console.log('3')
+                callback(xhr.response);
+            };
+            console.log('4')
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+        }
+
+        $(document).ready(function () {
+            $('.js-example-basic-single').select2({
+                placeholder: "เลือกโรงพยาบาล"
+            });
+        });
+
+        function submit_upload_func(event) {
+            event.preventDefault();
+            document.getElementById("file_verify").required = true;
+            document.getElementById("mySelect2").required = true;
+            let select = document.getElementById('mySelect2')
+            let selected = select.options[select.selectedIndex].text;
+            let file_name = document.getElementById('file_verify').files[0].name
+            Swal.fire({
+                title: `อัปโหลด\n<u>${file_name}</u>\n${selected}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#BB2D3B',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonText: 'ยืนยัน',
+
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('submit_upload').disabled = true
+                    document.getElementById('upload_file_form').submit()
+                    try{
+                        loading_page()
+                    }catch (err){
+                        alert('internet disconnected')
+                    }
+
+                }
+            })
+        }
+
+        function loading_page() {
+            Swal.fire({
+                      title: 'กำลังอัปโหลดไฟล์...',
+                      {#html: 'I will close in <b></b> milliseconds.',#}
+                        allowOutsideClick: false,
+{% comment %}                      timer: 2000,
+                      timerProgressBar: true,{% endcomment %}
+                      didOpen: () => {
+                        Swal.showLoading()
+                       {% comment %} const b = Swal.getHtmlContainer().querySelector('b')
+                        timerInterval = setInterval(() => {
+                          b.textContent = Swal.getTimerLeft()
+                        }, 100){% endcomment %}
+                      },
+                      willClose: () => {
+                        clearInterval(timerInterval)
+                      }
+                    })
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% endblock %}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cert_upload" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cert_upload_hss" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Cert_upload_hss7" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/last" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/last_certificate-HSS7" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test1-master" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/django-debug-toolbar" vcs="Git" />
+  </component>
+</project>

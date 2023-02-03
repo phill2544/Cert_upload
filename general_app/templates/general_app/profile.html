@@ -1,0 +1,354 @@
+{% extends 'general_app/base.html' %}
+{% block head %}
+    <style>
+        #old_password_not_match {
+            display: none;
+        }
+    </style>
+{% endblock %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+    {% for message in messages %}
+        {% if message.message == 'old password not match' %}
+            <script>
+                $(document).ready(function () {
+                    {#console.log('55555')#}
+                    document.getElementById('old_password_not_match').style.display = "block";
+                    $('#change_password_modal').modal('show');
+                });
+
+            </script>
+        {% elif message.message == 'updated profile complete' %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: false,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                })
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'อัปเดตข้อมูลส่วนตัวเรียบร้อย'
+                })
+            </script>
+        {% endif %}
+    {% endfor %}
+
+    <form action="{% url 'profile' %} " method="post">
+        {{ form_user.non_field_errors }}
+        {{ form_auth.non_field_errors }}
+        {% csrf_token %}
+        <div class="jumbotron" style="min-height: 80vh;display: flex;align-items: center;">
+            <div class="container shadow mb-5 rounded rounded-4 overflow-hidden" style="background-color: white">
+                <div class="row">
+                    <div class="col">
+                        <div class="m-3">
+                            <label for="email_address"
+                                   class="form-label">อีเมล</label>{{ form_auth.email.errors }}{{ form_auth.email }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label class="form-label">ชื่อ</label>
+                                    <input name="first_name" class="form-control"
+                                           value="{{ user_information.user.first_name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label class="form-label">นามสกุล</label>
+                                    <input name="last_name" class="form-control"
+                                           value="{{ user_information.user.last_name }}">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label class="form-label">ตำแหน่ง</label>
+                                    <input name="position" class="form-control" type="text"
+                                           value="{{ user_information.detail.position }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label class="form-label">เบอร์โทร</label>
+                                    <input name="number" class="form-control"
+                                           oninput="this.value = this.value.replace(/[^0-9.-]/g, '').replace(/(\..*?)\..*/g, '$1');"
+                                           minlength="8" maxlength="12"
+                                           value="{{ user_information.detail.number }}">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col">
+                        <div class="m-3">
+                            <div style="display: none">
+                                {{ form_user.password }}
+                            </div>
+                            <label for="address" class="form-label">ที่อยู่</label>
+                            {#            <textarea class="form-control" id="address" rows="3" id="address" placeholder="185/19  ขอนแก่น"></textarea>#}
+                            {{ form_user.address.errors }}
+                            {{ form_user.address }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label for="province" class="form-label">จังหวัด</label>
+                                    {{ form_user.province.errors }}
+                                    {{ form_user.province }}
+                                    <input type="hidden" id="province_deleted" disabled class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="m-3">
+                                    <label for="ministry" class="form-label">กระทรวง</label>
+                                    {#            <input type="email" class="form-control" id="ministry" placeholder="กระทรวงสาธารณสุข">#}
+                                    {{ form_user.ministry.errors }}
+                                    {{ form_user.ministry }}
+                                    <input type="hidden" id="ministry_deleted" disabled class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="m-3">
+                            <label for="code" class="form-label">รหัส</label>
+                            {#            <input type="email" class="form-control" id="code" placeholder="1234567">#}
+                            {{ form_user.code.errors }}
+                            {{ form_user.code }}
+                        </div>
+                    </div>
+                </div>
+                <div class="m-3">
+                    <button type="submit" class="btn btn-success">บันทึก</button>
+                    <a class="mx-3" data-bs-target="#change_password_modal" data-bs-toggle="modal"
+                       href="#change_password_modal">เปลี่ยนรหัสผ่าน</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+    <div class="modal fade" id="change_password_modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'change_password' %}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">เปลี่ยนรหัสผ่าน</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        {% csrf_token %}
+                        {#                        <div class="container">#}
+                        <div class="mb-3 col" style="margin-right: auto;margin-left: auto;">
+                            <label for="username" class="form-label">ชื่อผู้ใช้งาน</label>
+                            <input type="text" class="form-control {% comment %}form-control-lg{% endcomment %}"
+                                   value="{{ user.username }}" disabled
+                                   id="username">
+                        </div>
+                        <div class="mb-3 col" style="margin-right: auto;margin-left: auto;">
+                            <label for="id_old_password" class="form-label"
+                                   style="font-size: 18px">รหัสผ่านเก่า</label>
+                            <input type="password" name="old_password" autocomplete="current-password" autofocus=""
+                                   class="form-control {% comment %}form-control-lg{% endcomment %} mb-1"
+                                   required=""
+                                   id="id_old_password">
+                            <p id="old_password_not_match" class="alert alert-danger p-1">
+                                รหัสผ่านเดิมไม่ถูกต้อง</p>
+                            <input type="checkbox" onclick="show_password1()">แสดงรหัสผ่าน
+                            {% comment %}  {% if 'old_password' in form.errors %}
+                                <div class="alert alert-danger p-1" role="alert">
+                                    รหัสผ่านเดิมไม่ถูกต้อง
+                                </div>
+                            {% endif %}{% endcomment %}
+                        </div>
+
+
+                        <div class="mb-3 col" style="margin-right: auto;margin-left: auto;">
+                            <label for="id_new_password1" class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" name="new_password1" autocomplete="new-password" required=""
+                                   minlength="8"
+                                   class="form-control {% comment %}form-control-lg{% endcomment %} mb-1"
+                                   id="id_new_password1">
+                            <p id="message_password1"></p>
+                            <input type="checkbox" onclick="show_password2()">แสดงรหัสผ่าน
+                            {% if 'new_password2' in form.errors %}
+                                <div class="alert alert-danger p-1" role="alert">
+                                    รหัสผ่านง่ายเกินไป
+                                </div>
+                            {% endif %}
+                            {#                            <ul>#}
+                            {#                                <li>มีอย่างน้อย 8 หลัก</li>#}
+                            {#                    <li>มีตัวอักษรอย่างน้อย 1 ตัว</li>#}
+                            {#                            </ul>#}
+                        </div>
+
+
+                        <div class="mb-3 col" style="margin-right: auto;margin-left: auto;">
+                            <label for="id_new_password2" class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" name="new_password2" autocomplete="new-password" required=""
+                                   class="form-control {% comment %}form-control-lg{% endcomment %}"
+                                   id="id_new_password2" minlength="8">
+                            {#                <span id='message'></span>#}
+                            <p class='mt-1' id="message_password2"></p>
+                            {% if form.errors == 'The two password fields didn’t match.' %}
+                                <div class="alert alert-danger" role="alert">
+                                    รหัสผ่านใหม่ทั้ง2ช่องไม่ตรงกัน
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {#            {% for field in form %}#}
+                        {#                <div class=form-group">#}
+                        {#                    {{ field.label }}#}
+                        {#                    {{ field }}#}
+                        {#                </div>#}
+                        {#                {% if field.errors %}#}
+                        {#                    <div class="alert alert-danger">#}
+                        {#                        {{ field.errors }}#}
+                        {#                    </div>#}
+                        {#                    {% if field.errors%}#}
+                        {#                        ใส่รหัสผ่านใหม่#}
+                        {#                        {% endif %}#}
+                        {#                {% endif %}#}
+                        {#            {% endfor %}#}
+
+
+                        {#                    {% for error in form.non_field_errors %}#}
+                        {#                        <div class="alert alert-danger">#}
+                        {#                            {{ error }}#}
+                        {#                        </div>#}
+                        {#                    {% endfor %}#}
+                        {#                        {% for field in form %}#}
+                        {#                            <div class=form-group">#}
+                        {#                                {{ field.label }}#}
+                        {#                                {{ field }}#}
+                        {#                            </div>#}
+                        {#                            {% if field.errors %}#}
+                        {#                                <div class="alert alert-danger">#}
+                        {#                                    {{ field.errors }}#}
+                        {#                                </div>#}
+                        {#                            {% endif %}#}
+                        {#                        {% endfor %}#}
+                        {#                        </div>#}
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="change_password_btn">ยืนยัน</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        $(document).ready(function () {
+            document.getElementById('email_profile').required = true;
+            var select_province = document.getElementById("province");
+            var select_ministry = document.getElementById("ministry");
+            {% comment %}            console.log('{{ user_information.detail.province.id }}')// 40
+                        console.log('{{ user_information.detail.province.province }}')//เทส{% endcomment %}
+            var options_province = [];
+            var options_ministry = [];
+            {% comment %}            var province_id = '{{ user_information.detail.ministry.id }}'
+                        var ministry = '{{ user_information.detail.ministry.ministry }}'{% endcomment %}
+            for (var i = 0; i < select_province.length; i++) {
+                options_province.push(select_province.options[i].value)
+            }
+            for (i = 0; i < select_ministry.length; i++) {
+                options_ministry.push(select_ministry.options[i].value)
+            }
+
+            if (options_province.includes('{{ user_information.detail.province.id }}')) {
+                console.log('if')
+                document.getElementById("province").style.display = '';
+                document.getElementById("province_deleted").type = 'hidden';
+                select_province.value = '{{ user_information.detail.province.id }}'
+            } else {
+                console.log('else')
+                document.getElementById("province").style.display = 'none';
+                document.getElementById("province_deleted").type = 'text';
+                document.getElementById("province_deleted").value = '{{ user_information.detail.province.province }}';
+            }
+
+            if (options_ministry.includes('{{ user_information.detail.ministry.id }}')) {
+                document.getElementById("ministry").style.display = '';
+                document.getElementById("ministry_deleted").type = 'hidden';
+                select_ministry.value = '{{ user_information.detail.ministry.id }}'
+            } else {
+                document.getElementById("ministry").style.display = 'none';
+                document.getElementById("ministry_deleted").type = 'text';
+                document.getElementById("ministry_deleted").value = '{{ user_information.detail.ministry.ministry }}';
+            }
+            document.getElementById('password_detail').value = '{{ user_information.detail.password }}';
+            document.getElementById('password_detail').disabled = false;
+        })
+
+
+        $('#id_new_password1, #id_new_password2').on('keyup', function () {
+                if ($('#id_new_password1').val().length >= 8) {
+                    $('#message_password1').html('รหัสผ่านถูกต้อง').css('color', 'green');
+                    {#console.log('password correct2')#}
+                    document.getElementById("change_password_btn").disabled = false;
+                    console.log(document.getElementById('id_new_password2').value)
+                    if ($('#id_new_password1').val() == $('#id_new_password2').val() && $('#id_new_password1').val() != '') {
+                        $('#message_password2').html('รหัสผ่านถูกต้อง').css('color', 'green');
+                        {#console.log('password correct1')#}
+                        document.getElementById("change_password_btn").disabled = false;
+                    } else {
+                        $('#message_password2').html('รหัสผ่านไม่ตรงกัน').css('color', 'red');
+                        document.getElementById("change_password_btn").disabled = true;
+                        {#console.log('password incorrect1')#}
+                    }
+                } else {
+                    $('#message_password1').html('รหัสผ่านต้องมากกว่า 8 หลัก').css('color', 'red');
+                    document.getElementById("change_password_btn").disabled = true;
+                    {#console.log('password incorrect2')#}
+                    if ($('#id_new_password1').val() == $('#id_new_password2').val() && $('#id_new_password1').val() != '') {
+                        $('#message_password2').html('รหัสผ่านถูกต้อง').css('color', 'green');
+                        {#console.log('password correct1')#}
+                    } else if ($('#id_new_password2').val() != '') {
+                        $('#message_password2').html('รหัสผ่านไม่ตรงกัน').css('color', 'red');
+                        document.getElementById("change_password_btn").disabled = true;
+                        {#console.log('password incorrect1')#}
+                    }
+                }
+            }
+        )
+
+        function show_password1() {
+            var password1 = document.getElementById("id_old_password");
+
+            if (password1.type === "password") {
+                password1.type = "text";
+            } else {
+                password1.type = "password";
+            }
+        }
+
+        function show_password2() {
+            var password2 = document.getElementById("id_new_password1");
+
+            if (password2.type === "password") {
+                password2.type = "text";
+            } else {
+                password2.type = "password";
+            }
+        }
+    </script>
+{% endblock %}
